@@ -4,6 +4,7 @@ name VARCHAR(256) NOT NULL,
 password VARCHAR(256) NOT NULL,
 email VARCHAR(256) NOT NULL UNIQUE,
 birthday DATE NOT NULL,
+join_date DATE NOT NULL,
 gender CHAR(6) NOT NULL,
 is_admin BOOLEAN NOT NULL,
 is_activated BOOLEAN NOT NULL,
@@ -49,7 +50,7 @@ VALUES
 ('crate223','not funny','2015-1-2','2016-1-2',300,0)
 ('books1213','funny',NULL,NULL,211,11);
 
-INSERT INTO person (name, email, password, birthday, gender, is_admin, is_activated)
+INSERT INTO person (name, email, password, birthday, join_date, gender, is_admin, is_activated)
 VALUES 
-('admin', 'admin@hotmail.com', 'Password123', '02-10-2000', 'male', 'TRUE', 'TRUE'),
-('user', 'user@hotmail.com', 'Password123', '02-10-2000','female', 'FALSE', 'TRUE');
+('admin', 'admin@hotmail.com', 'Password123', '02-10-2000', '2000-01-01', 'male', 'TRUE', 'TRUE'),
+('user', 'user@hotmail.com', 'Password123', '02-10-2000', '2000-01-1', 'female', 'FALSE', 'TRUE');

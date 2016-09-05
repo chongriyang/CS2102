@@ -3,7 +3,6 @@ error_reporting(E_ALL & ~E_NOTICE);
 session_start();
 
 if (!empty($_POST['login_submit'])) {
-	include_once("open_connection.php");
 	$email = trim($_POST['email']);
 	$email = strtolower($email);
 	$password = strip_tags($_POST['password']);
