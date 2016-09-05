@@ -31,13 +31,14 @@
           <span class="icon-bar"></span>
           <span class="dropdown"></span> 
         </button>
-        <a class="navbar-brand" href="homepage.php">CrowdFunding</a>
+        <a class="navbar-brand" href="user.php">CrowdFunding</a>
       </div>
       <div class="collapse navbar-collapse" id="myNavbar">
         <ul class="nav navbar-nav navbar-right">
           <li><a href="#">Browse</a></li>
           <li><a href="#">Create a Project</a></li>
           <li><a href="#">Gallery</a></li>
+          <li><a href="search.php">Search</a></li>
           <li>
               <a href="#" class="dropdown-toggle" data-toggle="dropdown" type="text">Welcome <?php echo $username ?> <span class="caret"></span></a>
               <ul class="dropdown-menu">

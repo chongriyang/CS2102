@@ -22,6 +22,9 @@ $db_user_id = $row[2];
 $db_username= $row[3];
 $db_is_admin= $row[4];
 
+$salt = "F3#@$%ewgSDGaskjf#@$EFsdFGqwjfqad@#$^$%&segjlkszflijs";
+$password = hash('sha256', $salt.$password);
+
 if ($email == $db_email && $password == $db_password) {
 $_SESSION['username'] = $db_username;
 $_SESSION['user_id'] = $db_user_id;
@@ -33,8 +36,6 @@ header('Location: user.php');
 die();
 }
 } else if ($email == $db_email && $password != $db_password) {
-echo $db_password;
-echo $db_is_admin;
 echo "Your email account or password is incorrect. Please try again.";
 } else {
 echo "The account doesn't exist. If you do not have an account, please sign up.";
@@ -69,7 +70,11 @@ $password = strip_tags($_POST['password']);
 $confirm_password = strip_tags($_POST['confirm_password']);
 $birthday = trim($_POST['date']);
 $gender = strip_tags($_POST['gender']);
-$query_insert_user = "INSERT INTO person (name, email, password, birthday, join_date, gender, is_admin, is_activated) VALUES ('$name', '$email', '$password', '$birthday', '$today_date', '$gender', 'FALSE', 'TRUE')";
+
+$salt = "F3#@$%ewgSDGaskjf#@$EFsdFGqwjfqad@#$^$%&segjlkszflijs";
+$hash_password = hash('sha256', $salt.$password);
+
+$query_insert_user = "INSERT INTO person (name, email, password, birthday, join_date, gender, is_admin, is_activated) VALUES ('$name', '$email', '$hash_password', '$birthday', '$today_date', '$gender', 'FALSE', 'TRUE')";
 $query_select_duplicate_user = "SELECT email FROM person WHERE email = '$email' LIMIT 1";
 $query_select_user = "SELECT user_id, name FROM person WHERE email = '$email' AND is_activated = '1' LIMIT 1";
 
@@ -173,6 +178,7 @@ include_once("close_connection.php");
 <li><a href="#">Browse</a></li>
 <li><a href="#">Create a Project</a></li>
 <li><a href="#">Gallery</a></li>
+<li><a href="search.php">Search</a></li>
 <li><a href="sign_up.php">Sign Up</a></li>
 
 <div>

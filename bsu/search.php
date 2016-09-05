@@ -1,8 +1,154 @@
-  <?php
-  error_reporting(E_ALL & ~E_NOTICE);
-  session_start();
-  ?>
+<?php
+error_reporting(E_ALL & ~E_NOTICE);
+session_start();
 
+if (isset($_SESSION['username']) && isset($_SESSION['user_id'])) {
+  	$username = $_SESSION['username'];
+  	$user_id = $_SESSION['user_id'];
+  } else {
+  	header('Location: index.php');
+  	die();
+  }
+
+if (!empty($_POST['login_submit'])) {
+include_once("open_connection.php");
+$email = trim($_POST['email']);
+$email = strtolower($email);
+$password = strip_tags($_POST['password']);
+
+$query = "SELECT email, password, user_id, name, is_admin FROM person WHERE email = '$email' AND is_activated = '1' LIMIT 1";
+
+if (!empty($email) && !empty($password)) {
+if (!preg_match('/[^A-Za-z0-9\@.]/', $email)) {
+$result = pg_query($query) or die('Query failed: ' . pg_last_error());
+if ($result) {
+$row = pg_fetch_row($result);
+$db_email = $row[0];
+$db_password = $row[1];
+$db_user_id = $row[2];
+$db_username= $row[3];
+$db_is_admin= $row[4];
+
+if ($email == $db_email && $password == $db_password) {
+$_SESSION['username'] = $db_username;
+$_SESSION['user_id'] = $db_user_id;
+if ($db_is_admin === 't') {
+header('Location: administator.php');
+die();
+} else {
+header('Location: user.php');
+die();
+}
+} else if ($email == $db_email && $password != $db_password) {
+echo $db_password;
+echo $db_is_admin;
+echo "Your email account or password is incorrect. Please try again.";
+} else {
+echo "The account doesn't exist. If you do not have an account, please sign up.";
+}
+}
+} else {
+echo "You entered an invalid email account with special characters (e.g. '!', '$', '#'). Please omit them and try again.";
+}
+} else if (!empty($email)) {
+if (!preg_match('/[^A-Za-z0-9\@.]/', $email)) {
+echo "Please enter your password.";
+} else {
+echo "You entered an invalid email account with special characters (e.g. '!', '$', '#'.). Please omit them and try again.";
+}
+} else if (!empty($password)) {
+echo "Please enter your email account.";
+} else {
+echo "Please enter your email account and password.";
+}
+include_once("close_connection.php");
+}
+
+if (!empty($_POST['sign_up_submit'])) {
+include_once("open_connection.php");
+date_default_timezone_set("Asia/Singapore");
+$today_date = date('Y-m-d');
+$error_msg = '';
+$name = trim($_POST['name']);
+$email = trim($_POST['email']);
+$email = strtolower($email);
+$password = strip_tags($_POST['password']);
+$confirm_password = strip_tags($_POST['confirm_password']);
+$birthday = trim($_POST['date']);
+$gender = strip_tags($_POST['gender']);
+$query_insert_user = "INSERT INTO person (name, email, password, birthday, join_date, gender, is_admin, is_activated) VALUES ('$name', '$email', '$password', '$birthday', '$today_date', '$gender', 'FALSE', 'TRUE')";
+$query_select_duplicate_user = "SELECT email FROM person WHERE email = '$email' LIMIT 1";
+$query_select_user = "SELECT user_id, name FROM person WHERE email = '$email' AND is_activated = '1' LIMIT 1";
+
+if (!empty($name)) {
+if (!preg_match('/[^A-Za-z0-9]/', $name)) {
+if (!empty($email)) {
+$result_select_duplicate_user = pg_query($query_select_duplicate_user) or die('Query failed: ' . pg_last_error());
+
+if ($result_select_duplicate_user) {
+$row = pg_fetch_row($result_select_duplicate_user);
+$db_email = $row[0];
+}
+
+if ($email != $db_email) {
+if (!preg_match('/[^A-Za-z0-9\@.]/', $email)) {
+if (!empty($password)) {
+  if (strlen($password) >= 8 && preg_match('/[A-Z]/', $password)) {
+    if (!empty($confirm_password)) {
+      if ($password !== $confirm_password) {
+        $error_msg = 'Password mismatch. Please verify.';
+      } else {
+              if (preg_match("/^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])$/",$birthday) && $birthday <= $today_date) {
+                if (strcmp($gender, 'male') == 0 || strcmp($gender, 'female') == 0) {
+                  $result_insert_user = pg_query($query_insert_user) or die('Query failed: ' . pg_last_error());
+                  if ($result_insert_user) {
+                    $result_select_user = pg_query($query_select_user) or die('Query failed: ' . pg_last_error());
+                    if ($result_select_user) {
+                      $row = pg_fetch_row($result_select_user);
+                      $db_user_id = $row[0];
+                      $db_username= $row[1];
+                      $_SESSION['username'] = $db_username;
+                      $_SESSION['user_id'] = $db_user_id;
+                      header('Location: user.php');
+                      die();
+                    }
+                  }
+                } else {
+                  $error_msg = 'Please specify your gender.';
+                }
+              } else {
+                  $error_msg = 'Invalid birthday. Please try again.';
+              }
+              
+      }
+    } else {
+      $error_msg = 'Please enter confirm password';
+    }
+  } else {
+    $error_msg = 'Password minimum length should be 8 characters with at least 1 uppercase.';
+  }
+} else {
+  $error_msg = 'Please enter your password.';
+}
+} else {
+$error_msg = 'You entered an invalid name with special characters (e.g. \'!\', \'$\', \'#\'.). Please omit them and try again.';
+}
+} else {
+$error_msg = 'This account has already existed. Please try agian.';
+}
+} else {
+$error_msg = 'Please enter your email account.';
+}
+} else {
+$error_msg = 'You entered an invalid name with special characters (e.g. \'!\', \'$\', \'#\'.). Please omit them and try again.';
+}
+
+} else {
+$error_msg = 'Please enter your name.';
+}
+include_once("close_connection.php");
+}
+?>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -33,6 +179,19 @@
 <li><a href="#">Create a Project</a></li>
 <li><a href="#">Gallery</a></li>
 <li><a href="search.php">Search</a></li>
+<?php if (isset($_SESSION['username']) && isset($_SESSION['user_id'])) { ?>
+<li>
+<a href="#" class="dropdown-toggle" data-toggle="dropdown" type="text">Welcome <?php echo $username ?> <span class="caret"></span></a>
+<ul class="dropdown-menu">
+<li><a href="#"></a></li>
+<li><a href="#">My Projects</a></li>
+<li><a href="#">Funded Projects</a></li>
+<li><a href="#">Bookmarked Projects</a></li>
+<li><a href="#">Transactions</a></li>
+<li><a href="#">Edit Profile</a></li>
+<li><a href="logout.php">Log Out</a></li>
+<?php } ?>
+<?php if (!(isset($_SESSION['username']) && isset($_SESSION['user_id']))) { ?>
 <li><a href="sign_up.php">Sign Up</a></li>
 
 <div>
@@ -64,7 +223,7 @@
 <button class="btn btn-lg btn-primary btn-block" type="submit" name="login_submit" value="login_submit">Sign in</button>
 </form>
 </div>
-
+<?php } ?>
 </div>
 </div>
 </div>
@@ -233,6 +392,18 @@ if(isset($_POST['formSubmit']))
 include_once("close_connection.php");
 ?>
 
+
+<style>
+.bg-4 {
+position:fixed;
+left:0px;
+bottom:0px;
+height:30px;
+width:100%;
+background-color: #2f2f2f;
+color: #ffffff;
+}
+</style>
 
 <footer class="container-fluid bg-4 text-center">
 <p><a href="about_us.php">About Us</a></p>

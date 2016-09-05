@@ -39,6 +39,7 @@ die();
 <li><a href="#">Browse</a></li>
 <li><a href="#">Create a Project</a></li>
 <li><a href="#">Gallery</a></li>
+<li><a href="search.php">Search</a></li>
 <li>
 <a href="#" class="dropdown-toggle" data-toggle="dropdown" type="text">Welcome <?php echo $username ?> <span class="caret"></span></a>
 <ul class="dropdown-menu">
