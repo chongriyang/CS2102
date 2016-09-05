@@ -91,6 +91,7 @@ include_once("close_connection.php");
 <li><a href="#">Browse</a></li>
 <li><a href="#">Create a Project</a></li>
 <li><a href="#">Gallery</a></li>
+<li><a href="search.php">Search</a></li>
 <li><a href="sign_up.php">Sign Up</a></li>
 
 <div>
