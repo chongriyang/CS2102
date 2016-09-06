@@ -5,9 +5,6 @@ session_start();
 if (isset($_SESSION['username']) && isset($_SESSION['user_id'])) {
   	$username = $_SESSION['username'];
   	$user_id = $_SESSION['user_id'];
-  } else {
-  	header('Location: index.php');
-  	die();
   }
 
 if (!empty($_POST['login_submit'])) {

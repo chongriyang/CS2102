@@ -1,11 +1,10 @@
 <?php
 error_reporting(E_ALL & ~E_NOTICE);
-session_destroy();
 session_start();
 
 if (isset($_COOKIE['user']) && !empty(isset($_COOKIE['user']))) {
 include("open_connection.php");
-setcookie('user', "", time() - 3600, "/", "", 0);
+setcookie('user', "", time() - 7200, "/", "", 0);
 $user_id = $_SESSION['user_id'];
 $query_select_user = "SELECT user_id FROM cookie WHERE user_id = '$user_id' LIMIT 1";
 $result_select_user = pg_query($query_select_user) or die('Query failed: ' . pg_last_error());
@@ -16,8 +15,11 @@ if ($result_select_user) {
 		//Successfully delete entry from cookie table
 	}
 }
+session_destroy();
 include("close_connection.php");
 }
+
+session_start();
 
 if (!empty($_POST['login_submit'])) {
 include_once("open_connection.php");
