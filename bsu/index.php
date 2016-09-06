@@ -33,11 +33,11 @@ $result_login = pg_query($query_login) or die('Query failed1: ' . pg_last_error(
 if ($result_login) {
 $row_login = pg_fetch_row($result_login);
 $name = $row_login[0];
-}
 $_SESSION['username'] = $name;
 $_SESSION['user_id'] = $user_id;
 header('Location: user.php');
 die();
+}
 }
 }
 }
@@ -75,7 +75,7 @@ $salt = "askhd@!sadknsa!@$R%$*&)(*_GFJsjhfj$WETkahfliqjafloaijfi;oeajfo;k";
 $identifier = hash('sha256', $salt.$db_email);
 $key = md5(uniqid(rand(), true));
 //$timeout = time() + 604800; // 7 days
-$timeout = new DateTime('+1 day');
+$timeout = new DateTime('+7 day');
 $timeout =$timeout->format('Y-m-d H:i:s');
 $query_insert_cookie = "INSERT INTO cookie (user_id, identifier, key, timeout) VALUES ('$db_user_id', '$identifier', '$key', '$timeout')";
 $timeout = strtotime($timeout);
