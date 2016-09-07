@@ -55,6 +55,99 @@ if (isset($_SESSION['username']) && isset($_SESSION['user_id'])) {
 				</div>
 			</div>
 		</nav>
+
+		<table class="table table-bordered table-striped">
+		<h1>User Accounts</h1>
+		<thead>
+        <tr>
+            <th class="">id</th>
+            <th class="">Name</th>
+            <th class="">Password</th>
+            <th class="">Email</th>
+            <th class="">Birthday</th>
+            <th class="">Join date</th>
+            <th class="">Gender</th>
+            <th class="">Priviledge</th>
+            <th class="">Status</th>
+            <th class="">No. Bookmarks</th>
+            <th class=""></th>
+        </tr>
+    	</thead>
+    	<tbody>
+		<?php
+		include_once("open_connection.php");
+		$query_all_users = "SELECT * FROM person";
+		$result = pg_query($query_all_users) or die('Query failed: ' . pg_last_error());
+		while ($row = pg_fetch_array($result, null, PGSQL_ASSOC)) {
+		$db_user_id = $row['user_id'];
+		$db_name = $row['name'];
+		$db_password = $row['password'];
+		$db_email = $row['email'];
+		$db_birthday = $row['birthday'];
+		$db_join_date = $row['join_date'];
+		$db_gender = $row['gender'];
+		$db_is_admin = $row['is_admin'];
+		$db_is_activated = $row['is_activated'];
+		$db_bookmark = $row['bookmark'];
+
+		if ($db_is_admin == 't') {
+			$db_is_admin = "admin";
+		}	 else {
+			$db_is_admin = "user";
+		}
+
+if ($db_is_activated == 't') {
+			$db_is_activated = "activated";
+		}	 else {
+			$db_is_activated = "de-activated";
+		}
+
+		?>
+        <tr>
+            <td style="text-align:left;" class=""><?php echo $db_user_id ?></td>
+            <td style="text-align:left;" class=""><?php echo $db_name ?></td>
+            <td style="text-align:left;" class=""><?php echo $db_password ?></td>
+            <td style="text-align:left;" class=""><?php echo $db_email ?></td>
+            <td style="text-align:left;" class=""><?php echo $db_birthday ?></td>
+            <td style="text-align:left;" class=""><?php echo $db_join_date ?></td>
+            <td style="text-align:left;" class=""><?php echo $db_gender ?></td>
+            <td style="text-align:left;" class=""><?php echo $db_is_admin ?></td>
+            <td style="text-align:left;" class=""><?php echo $db_is_activated ?></td>
+            <td style="text-align:left;" class=""><?php echo $db_bookmark ?></td>
+            <td style="text-align:center;">
+                <button class="btn btn-success" data-toggle="modal" data-target="#myModal" contenteditable="false">Edit</button>
+            </td>
+        </tr>
+        <?php
+    	}
+    	include_once("close_connection.php");
+        ?>
+    </tbody>
+</table>
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content"></div>
+    </div>
+    <div class="modal-dialog">
+        <div class="modal-content"></div>
+    </div>
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"> <span aria-hidden="true" class="">×   </span><span class="sr-only">Close</span>
+
+                </button>
+                 <h4 class="modal-title" id="myModalLabel">Modal title</h4>
+
+            </div>
+            <div class="modal-body"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
 	</body>
 
 	<style>

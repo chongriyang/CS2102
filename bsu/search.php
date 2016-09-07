@@ -37,8 +37,6 @@ if (!empty($_POST['login_submit'])) {
 						die();
 					}
 				} else if ($email == $db_email && $password != $db_password) {
-					echo $db_password;
-					echo $db_is_admin;
 					echo "Your email account or password is incorrect. Please try again.";
 				} else {
 					echo "The account doesn't exist. If you do not have an account, please sign up.";

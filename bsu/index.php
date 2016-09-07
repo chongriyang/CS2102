@@ -25,17 +25,24 @@ if (isset($_COOKIE['user']) && !empty(isset($_COOKIE['user']))) {
 		$result_select_cookie = pg_query($query_cookie) or die('Query failed: ' . pg_last_error());
 		if (pg_num_rows($result_select_cookie)) {
 			$row = pg_fetch_row($result_select_cookie);
-			$user_id = $row[0];
-			$timeout = $row[1];
-			if ($now < $timeout) {
-				$query_login = "SELECT name FROM person WHERE user_id = '$user_id' AND is_activated = '1' LIMIT 1";
-				$result_login = pg_query($query_login) or die('Query failed1: ' . pg_last_error());
+			$db_user_id = $row[0];
+			$db_timeout = $row[1];
+			if ($now < $db_timeout) {
+				$query_login = "SELECT name, is_admin FROM person WHERE user_id = '$db_user_id' AND is_activated = '1' LIMIT 1";
+				$result_login = pg_query($query_login) or die('Query failed: ' . pg_last_error());
 				if ($result_login) {
 					$row_login = pg_fetch_row($result_login);
-					$name = $row_login[0];
-					$_SESSION['username'] = $name;
-					$_SESSION['user_id'] = $user_id;
-					header('Location: user.php');
+					$db_name = $row_login[0];
+					$db_is_admin = $row_login[1];
+					$_SESSION['username'] = $db_name;
+					$_SESSION['user_id'] = $db_user_id;
+					if ($db_is_admin === 't') {
+						header('Location: administator.php');
+						die();
+					} else {
+						header('Location: user.php');
+						die();
+					}
 					die();
 				}
 			}
@@ -82,7 +89,7 @@ if (!empty($_POST['login_submit'])) {
 
 						$result_insert_cookie = pg_query($query_insert_cookie) or die('Query failed: ' . pg_last_error());;
 						if ($result_insert_cookie) {
-							setcookie('user', "$identifier:$key", $timeout);
+							setcookie('user', "$identifier:$key", $timeout, "/");
 						}
 					}
 					$_SESSION['username'] = $db_username;
