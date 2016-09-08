@@ -2,6 +2,7 @@
 error_reporting(E_ALL & ~E_NOTICE);
 session_start();
 
+
 if (isset($_SESSION['username']) && isset($_SESSION['user_id'])) {
 	$username = $_SESSION['username'];
 	$user_id = $_SESSION['user_id'];
@@ -266,7 +267,7 @@ if (!empty($_POST['sign_up_submit'])) {
 
 
 
-		<?php 
+<?php 
 /************************
  *establish db connection
  ************************/	
@@ -358,6 +359,7 @@ if(isset($_POST['formSubmit']))
 		echo "<th>Total Amount</th>";
 		echo "<th>Amount Raised</th>";
 		echo "<th>Closing Date</th>";
+		echo "<th></th>";
 		echo "</tr>";
 		echo "</thead>";
 
@@ -369,6 +371,7 @@ if(isset($_POST['formSubmit']))
 		echo "<td>$amount</td>";
 		echo "<td>$raised</td>";
 		echo "<td>$endDate</td>";
+		echo "<td><a href='project.php?project_id=$projectID'>View</a></td>";
 		echo "</tr><br>";
 		echo("</tbody>");
 		echo "</table>";
