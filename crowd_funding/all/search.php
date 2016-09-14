@@ -159,11 +159,11 @@ if (!empty($_POST['login_submit'])) {
 
 
 
-		<?php 
+<?php 
 /************************
  *establish db connection
  ************************/	
-include_once("open_connection.php");
+include_once $_SERVER['DOCUMENT_ROOT'] . '/crowd_funding/connection/open_connection.php';
 
 /**********************************************************
  *check if form is submitted, if yes, start SQL query
