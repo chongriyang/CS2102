@@ -1,35 +1,13 @@
 <nav class="navbar navbar-default">
-		<div class="container">
-			<div class="navbar-header">
-				<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
-					<span class="icon-bar"></span>
-					<span class="icon-bar"></span>
-					<span class="icon-bar"></span>
-					<span class="icon-bar"></span>
-				</button>
-
-				<a class="navbar-brand" href="/crowd_funding/index.php">CrowdFunding</a>
-			</div>
-			<div class="collapse navbar-collapse" id="?">
+		
 				<ul class="nav navbar-nav navbar-right">
-					<li><a href="/crowd_funding/project/browse.php">Browse</a></li>
-					<li><a href="/crowd_funding/project/create_project.php">Create a Project</a></li>
-					<li><a href="#">Gallery</a></li>
-					<li><a href="/crowd_funding/project/search.php">Search</a></li>
-					<?php if (isset($_SESSION['username']) && isset($_SESSION['user_id'])) { ?>
-					<li>
-						<a href="#" class="dropdown-toggle" data-toggle="dropdown" type="text">Welcome <?php echo $username ?> <span class="caret"></span></a>
-						<ul class="dropdown-menu">
-							<li><a href="#"></a></li>
-							<li><a href="/crowd_funding/project/view_project.php">My Projects</a></li>
-							<li><a href="/crowd_funding/project/view_funded_project.php">Funded Projects</a></li>
-							<li><a href="/crowd_funding/project/view_bookmarked_project.php">Bookmarked Projects</a></li>
-							<li><a href="/crowd_funding/project/view_transaction.php">Transactions</a></li>
-							<li><a href="#">Edit Profile</a></li>
-							<li><a href="/crowd_funding/module/logout.php">Log Out</a></li>
-							<?php } ?>
+					
+					
+						
+							
+							
 							<?php if (!(isset($_SESSION['username']) && isset($_SESSION['user_id']))) { ?>
-							<li><a href="/crowd_funding/module/sign_up.php">Sign Up</a></li>
+							
 
 							<div>
 								<button style="position:absolute;margin: 0;height: 3.5em" type="button" class="btn btn-success" data-toggle="modal" data-target="#loginPopUpWindow">Sign In</button>
@@ -66,7 +44,6 @@
 								</div>
 							</li>
 
-						</ul>
-					</div>
-				</div>
+						
+					
 			</nav>

@@ -159,12 +159,13 @@ if (!empty($_POST['login_submit'])) {
 
 
 
-<?php 
+		<?php 
 /************************
  *establish db connection
  ************************/	
 include_once $_SERVER['DOCUMENT_ROOT'] . '/crowd_funding/connection/open_connection.php';
-
+$url='/crowd_funding/project/browse.php';
+$_SESSION['url'] = $url;
 /**********************************************************
  *check if form is submitted, if yes, start SQL query
  **********************************************************/	
@@ -232,25 +233,40 @@ if(isset($_POST['formSubmit']))
 	/**************************************************
 	 *display SQL query result (html formatting)
 	 **************************************************/
-	echo '<div class="container">'; 
+	echo '<div class="container-fluid">'; 
 	echo '<div class="row">'; 
 	while ($row = pg_fetch_array($result, null, PGSQL_ASSOC)) {
+		
+		$userID = $row['user_id'];
 		$projectID = $row['project_id'];
-		$name = $row['name'];
+		$categoryID = $row['category_id'];
+		$projectName = $row['name'];
 		$description = $row['description'];
 		$amount = $row['amount'];
 		$raised = $row['raised'];
 		$endDate = $row['end_date'];
+		
+		$getName = pg_query("SELECT name FROM person WHERE user_id ='$userID'") or die ('One owner does not exist');
+		$row2 = pg_fetch_array($getName);
+		$username = $row2['name'];
 
-		echo '<table class="table table-hover table-inverse">';
+		$getCategory = pg_query("SELECT type FROM category WHERE category_id = '$categoryID'") or die ('One category does not exist');
+		$row3 = pg_fetch_array($getCategory);
+		$categorytype = $row3['type'];		
+
+		echo '<table class="table table-hover table-inverse" >';
 		echo "<thead>";
 		echo "<tr>";
 		echo "<th>Project ID</th>";
+		echo "<th>Owner</th>";
 		echo "<th>Project Name</th>";
 		echo "<th>Description</th>";
+		echo "<th>Category</th>";
 		echo "<th>Total Amount</th>";
 		echo "<th>Amount Raised</th>";
 		echo "<th>Closing Date</th>";
+		echo "<th>View</th>";
+		echo "<th>Action</th>";
 		echo "<th></th>";
 		echo "</tr>";
 		echo "</thead>";
@@ -258,12 +274,44 @@ if(isset($_POST['formSubmit']))
 		echo("<tbody>");
 		echo "<tr>";
 		echo "<td>$projectID</td>";
-		echo "<td>$name</td>";
+		echo "<td>$username</td>";
+		echo "<td>$projectName</td>";
 		echo "<td>$description</td>";
-		echo "<td>$amount</td>";
-		echo "<td>$raised</td>";
-		echo "<td>$endDate</td>";
-		echo "<td><a href='project.php?project_id=$projectID'>View</a></td>";
+		echo "<td>$categorytype</td>";
+		echo "<td>$$amount</td>";
+		echo "<td>$$raised</td>";
+		echo "<td>$endDate</td>"; 
+		?>
+		<td><a href="project.php?project_id=$projectID" type="button" class="btn btn-success">View</a></td>
+		<td width=70><button  type="button"  class="btn btn-success"  data-toggle="modal" data-target="#<?php echo''.$projectID.'';?>">Fund</button></td></tr>
+			<div class="modal fade" id="<?php echo''.$projectID.'';?>">
+				<div class="modal-dialog">
+					<div class="modal-content">
+
+						<!-- header -->
+						<div class="modal-header">
+							<button type="button" class="close" data-dismiss="modal">&times;</button>
+							<h3 class="modal-title">FUND AMOUNT</h3>
+						</div>
+
+						<!-- body (form) -->
+						<div class="modal-body">
+							<form method="get" action="/crowd_funding/project/fund_project.php" class="form-signin">
+							
+								<label for="input_amount" class="sr-only">Amount: </label>
+								<input type="text" id="input_amount" class="form-control" placeholder="Enter amount" name="amount" required autofocus>
+							
+							
+								<button class="btn btn-lg btn-primary btn-block" type="submit" name="project_id" value="<?php echo''.$projectID.'';?>">Fund</button>
+							
+							</form>
+						</div>
+						
+					</div>
+				</div>
+			</div>
+		<?php
+		
 		echo "</tr><br>";
 		echo("</tbody>");
 		echo "</table>";

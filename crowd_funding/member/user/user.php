@@ -37,6 +37,7 @@
   </head>
   <body>
   <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/crowd_funding/header/navbar.php'); ?>
+  
   	</body>
 
   	<?php require_once($_SERVER['DOCUMENT_ROOT'] . '/crowd_funding/header/footer.php'); ?>
