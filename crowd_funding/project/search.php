@@ -133,12 +133,36 @@ if (!empty($_POST['login_submit'])) {
 				</div>
 
 				<!-- Search form template -->
-				<div class="container">
+				
 					<div class="row">
 						<div class="col-lg-12 text-center">
 							<form class="form-inline" method="post">
 								<div class="form-group">
+									<input type="text" class="form-control" name="owner" placeholder="owner">
+								</div>
+								<div class="form-group">
 									<input type="text" class="form-control" name="name" placeholder="project title">
+								</div>
+								<div class="form-group">
+									<!-- <input type="text" class="form-control" name="type" placeholder="category"> -->
+									<select class="select form-control" name="type" placeholder="category">
+										<option value="">-</option>
+										<option value="Art">Art</option>
+										<option value="Comics">Comics</option>
+										<option value="Crafts">Crafts</option>
+										<option value="Dance">Dance</option>
+										<option value="Design">Design</option>
+										<option value="Fashion">Fashion</option>
+										<option value="Film & Video">Film & Video</option>
+										<option value="Food">Food</option>
+										<option value="Games">Games</option>
+										<option value="Journalism">Journalism</option>
+										<option value="Music">Music</option>
+										<option value="Photography">Photography</option>
+										<option value="Publishing">Publishing</option>
+										<option value="Technology">Technology</option>
+										<option value="Theater">Theater</option>
+									</select>
 								</div>
 								<div class="form-group">
 									<input type="text" class="form-control" name="description" placeholder="description">
@@ -153,7 +177,7 @@ if (!empty($_POST['login_submit'])) {
 							</form>
 						</div>
 					</div>
-				</div>
+				
 			</section>
 		</body>
 
@@ -171,24 +195,40 @@ $_SESSION['url'] = $url;
  **********************************************************/	
 if(isset($_POST['formSubmit'])) 
 {
-	$fields = array('name', 'description', 'amount', 'raised');
+	$fields = array('owner', 'name', 'type', 'description', 'amount', 'raised');
 	$conditions = array();
 	$query = '';
 	
+
+	$query = "SELECT p.project_id as project_id, p.user_id as user_id, p.category_id as category_id, p.name as project_name,p.description as description, 
+			p.amount as amount, p.raised as raised, p.end_date as end_date FROM project p ";
 	/*********************************
 	 *get all search keywords, if any
 	 *********************************/	
 	foreach($fields as $value){
 
 		if($_POST[$value] != '') {
-
-			$query = "SELECT * FROM project ";
+			
 			//doing case insensitive search on strings and strict comparison on numbers
 			if(is_numeric($_POST[$value])){
-				$conditions[] = "$value = " . pg_escape_string($_POST[$value]) . " ";
+				$conditions[] = "p."."$value = " . pg_escape_string($_POST[$value]) . " ";
 			}else{
 				$searchTerm = strtolower($_POST[$value]);
-				$conditions[] = "lower($value) LIKE '%" . pg_escape_string($searchTerm) . "%'";
+				
+				if($value == 'owner'){
+						$query.=', person u '; 
+						$conditions[] = "lower(u.name) LIKE '%" . pg_escape_string($searchTerm) . "%'";
+						$conditions[] = "u.user_id = p.user_id";
+				}
+				else if($value == 'type'){
+						$query.=', category c ';
+						$conditions[] = "lower(c.$value) LIKE '%" . pg_escape_string($searchTerm) . "%'";
+						$conditions[] = "c.category_id = p.category_id";
+				}
+				else
+				{
+					$conditions[] = "lower(p.$value) LIKE '%" . pg_escape_string($searchTerm) . "%'";
+				}
 			}
 		}
 	}
@@ -198,7 +238,7 @@ if(isset($_POST['formSubmit']))
 	 **************************************************/
 	if(count($conditions) > 0) {
 		$query .= " WHERE " . implode (' AND ', $conditions); // you can change to 'OR', but I suggest to apply the filters cumulative
-		$query .= " ORDER BY project_id ASC ";
+		$query .= " ORDER BY p.project_id ASC ";
 	}
 
 	/**************************************************
@@ -233,14 +273,14 @@ if(isset($_POST['formSubmit']))
 	/**************************************************
 	 *display SQL query result (html formatting)
 	 **************************************************/
-	echo '<div class="container-fluid">'; 
+	echo '<div class="container">'; 
 	echo '<div class="row">'; 
 	while ($row = pg_fetch_array($result, null, PGSQL_ASSOC)) {
 		
 		$userID = $row['user_id'];
 		$projectID = $row['project_id'];
 		$categoryID = $row['category_id'];
-		$projectName = $row['name'];
+		$projectName = $row['project_name'];
 		$description = $row['description'];
 		$amount = $row['amount'];
 		$raised = $row['raised'];
