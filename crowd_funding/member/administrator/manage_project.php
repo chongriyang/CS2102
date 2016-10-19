@@ -33,7 +33,7 @@ if (!empty($_POST['login_submit'])) {
 	$salt = "F3#@$%ewgSDGaskjf#@$EFsdFGqwjfqad@#$^$%&segjlkszflijs";
 	$password = hash('sha256', $salt.$password);
 
-	$query_login = "SELECT email, password, user_id, name, is_admin, is_activated FROM person WHERE email = '$email' LIMIT 1";
+	$query_login = "SELECT p.email, p.password, p.user_id, p.name, p.is_admin FROM person p WHERE p.email = '$email' AND p.is_activated = '1' LIMIT 1";
 
 	if (!empty($email) && !empty($password)) {
 		if (!preg_match('/[^A-Za-z0-9\@.]/', $email)) {
@@ -45,16 +45,15 @@ if (!empty($_POST['login_submit'])) {
 				$db_user_id = $row[2];
 				$db_username= $row[3];
 				$db_is_admin= $row[4];
-				$db_is_activated = $row[5];
 
 				if ($email == $db_email && $password == $db_password) {
-					if ($db_is_activated === 't') {
-						$_SESSION['username'] = $db_username;	
-						$_SESSION['user_id'] = $db_user_id;
-						$_SESSION['is_admin'] = $db_is_admin;
-						if ($_POST['remember_me'] == '1') {
-							$salt = "askhd@!sadknsa!@$R%$*&)(*_GFJsjhfj$WETkahfliqjafloaijfi;oeajfo;k";
-							$identifier = hash('sha256', $salt.$db_email);
+					$_SESSION['username'] = $db_username;	
+					$_SESSION['user_id'] = $db_user_id;
+					$_SESSION['is_admin'] = $db_is_admin;
+					if ($_POST['remember_me'] == '1') {
+
+						$salt = "askhd@!sadknsa!@$R%$*&)(*_GFJsjhfj$WETkahfliqjafloaijfi;oeajfo;k";
+						$identifier = hash('sha256', $salt.$db_email);
 						$key = md5(uniqid(rand(), true)); //$timeout = time() + 604800; // 7 days
 						$timeout = new DateTime('+7 day');
 						$timeout =$timeout->format('Y-m-d H:i:s');
@@ -87,30 +86,27 @@ if (!empty($_POST['login_submit'])) {
 						header('Location: /crowd_funding/member/user/user.php');
 						die();
 					}
+				} else if ($email == $db_email && $password != $db_password) {
+					echo "Your email account or password is incorrect. Please try again.";
 				} else {
-					echo "Your account has been deactivated. Please contact the administrator.";
+					echo "The account doesn't exist. If you do not have an account, please sign up.";
 				}
-			} else if ($email == $db_email && $password != $db_password) {
-				echo "Your email account or password is incorrect. Please try again.";
-			} else {
-				echo "The account doesn't exist. If you do not have an account, please sign up.";
 			}
+		} else {
+			echo "You entered an invalid email account with special characters (e.g. '!', '$', '#'). Please omit them and try again.";
 		}
+	} else if (!empty($email)) {
+		if (!preg_match('/[^A-Za-z0-9\@.]/', $email)) {
+			echo "Please enter your password.";
+		} else {
+			echo "You entered an invalid email account with special characters (e.g. '!', '$', '#'.). Please omit them and try again.";
+		}
+	} else if (!empty($password)) {
+		echo "Please enter your email account.";
 	} else {
-		echo "You entered an invalid email account with special characters (e.g. '!', '$', '#'). Please omit them and try again.";
+		echo "Please enter your email account and password.";
 	}
-} else if (!empty($email)) {
-	if (!preg_match('/[^A-Za-z0-9\@.]/', $email)) {
-		echo "Please enter your password.";
-	} else {
-		echo "You entered an invalid email account with special characters (e.g. '!', '$', '#'.). Please omit them and try again.";
-	}
-} else if (!empty($password)) {
-	echo "Please enter your email account.";
-} else {
-	echo "Please enter your email account and password.";
-}
-include_once $_SERVER['DOCUMENT_ROOT'] . '/crowd_funding/connection/close_connection.php';
+	include_once $_SERVER['DOCUMENT_ROOT'] . '/crowd_funding/connection/close_connection.php';
 }
 ?>
 
@@ -123,9 +119,13 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/crowd_funding/connection/close_connec
 	<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
 	<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
 </head>
 <body>
 	<?php require_once($_SERVER['DOCUMENT_ROOT'].'/crowd_funding/header/navbar.php'); ?>
+	<div class="col-lg-12 text-center">
+		<h1>Projects</h1>
+	</div>
 			<!-- Search Section -->
 			<section id="search_bar">
 				<div class="container">
@@ -202,10 +202,9 @@ if(isset($_POST['formSubmit']))
 	$fields = array('owner', 'name', 'type', 'description', 'amount', 'raised');
 	$conditions = array();
 	$query = '';
-	
 
 	$query = "SELECT p.project_id as project_id, p.user_id as user_id, p.category_id as category_id, p.name as project_name,p.description as description, 
-			p.amount as amount, p.raised as raised, p.end_date as end_date FROM project p ";
+			p.amount as amount, p.raised as raised, p.start_date as start_date, p.end_date as end_date FROM project p ";
 	/*********************************
 	 *get all search keywords, if any
 	 *********************************/	
@@ -280,7 +279,6 @@ if(isset($_POST['formSubmit']))
 	echo '<div class="container">'; 
 	echo '<div class="row">'; 
 	while ($row = pg_fetch_array($result, null, PGSQL_ASSOC)) {
-		
 		$userID = $row['user_id'];
 		$projectID = $row['project_id'];
 		$categoryID = $row['category_id'];
@@ -288,15 +286,17 @@ if(isset($_POST['formSubmit']))
 		$description = $row['description'];
 		$amount = $row['amount'];
 		$raised = $row['raised'];
+		$startDate = $row['start_date'];
 		$endDate = $row['end_date'];
+		$rangeDate = $startDate . " - " . $endDate;
 		
-		$getName = pg_query("SELECT name FROM person WHERE user_id ='$userID'") or die ('One owner does not exist');
+		$getName = pg_query("SELECT p.name FROM person p WHERE p.user_id ='$userID'") or die ('One owner does not exist');
 		$row2 = pg_fetch_array($getName);
 		$username = $row2['name'];
 
-		$getCategory = pg_query("SELECT type FROM category WHERE category_id = '$categoryID'") or die ('One category does not exist');
+		$getCategory = pg_query("SELECT c.type FROM category c WHERE c.category_id = '$categoryID'") or die ('One category does not exist');
 		$row3 = pg_fetch_array($getCategory);
-		$categorytype = $row3['type'];	
+		$categorytype = $row3['type'];		
 
 		echo '<table class="table table-hover table-inverse" >';
 		echo "<thead>";
@@ -310,7 +310,7 @@ if(isset($_POST['formSubmit']))
 		echo "<th>Amount Raised</th>";
 		echo "<th>Closing Date</th>";
 		echo "<th>View</th>";
-		echo "<th>Action</th>";
+		echo "<th>Edit</th>";
 		echo "<th></th>";
 		echo "</tr>";
 		echo "</thead>";
@@ -324,36 +324,13 @@ if(isset($_POST['formSubmit']))
 		echo "<td>$categorytype</td>";
 		echo "<td>$$amount</td>";
 		echo "<td>$$raised</td>";
-		echo "<td>$endDate</td>"; 
+		echo "<td>$endDate</td>";
 		?>
 		<td><a href="project.php?project_id=$projectID" type="button" class="btn btn-success">View</a></td>
-		<td width=70><button  type="button"  class="btn btn-success"  data-toggle="modal" data-target="#<?php echo''.$projectID.'';?>">Fund</button></td></tr>
-			<div class="modal fade" id="<?php echo''.$projectID.'';?>">
-				<div class="modal-dialog">
-					<div class="modal-content">
-
-						<!-- header -->
-						<div class="modal-header">
-							<button type="button" class="close" data-dismiss="modal">&times;</button>
-							<h3 class="modal-title">FUND AMOUNT</h3>
-						</div>
-
-						<!-- body (form) -->
-						<div class="modal-body">
-							<form method="get" action="/crowd_funding/project/fund_project.php" class="form-signin">
-							
-								<label for="input_amount" class="sr-only">Amount: </label>
-								<input type="text" id="input_amount" class="form-control" placeholder="Enter amount" name="amount" required autofocus>
-							
-							
-								<button class="btn btn-lg btn-primary btn-block" type="submit" name="project_id" value="<?php echo''.$projectID.'';?>">Fund</button>
-							
-							</form>
-						</div>
-						
-					</div>
-				</div>
-			</div>
+		<?php
+		echo "<td><a class='btn btn-info' href='/crowd_funding/member/administrator/edit_project.php?id=".$projectID."&user_id=".$userID."'>Edit</a></td>";
+		echo "<td width=70><a class='btn btn-danger' href='/crowd_funding/member/administrator/delete_project.php?id=".$projectID."'>Delete</a></td></tr>";
+		?>
 		<?php
 		
 		echo "</tr><br>";
@@ -373,7 +350,29 @@ if(isset($_POST['formSubmit']))
 }
 include_once $_SERVER['DOCUMENT_ROOT'] . '/crowd_funding/connection/close_connection.php';
 ?>
-
-
+<script type="text/javascript" src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
+	
+<!-- Include Date Range Picker -->
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.1/js/bootstrap-datepicker.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.1/css/bootstrap-datepicker3.css"/>
 <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/crowd_funding/header/footer.php'); ?>
 </html>
+<script type="text/javascript" src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
+
+
+<!-- Include Date Range Picker -->
+<script type="text/javascript" src="//cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.js"></script>
+<link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.css" />
+
+<script>
+	$(document).ready(function(){
+	var date_input=$('input[name="date"]'); //our date input has the name "date"
+	var container=$('.bootstrap-iso form').length>0 ? $('.bootstrap-iso form').parent() : "body";
+	date_input.datepicker({
+	format: 'yyyy-mm-dd',
+	container: container,
+	todayHighlight: true,
+	autoclose: true,
+	})
+	})
+</script>

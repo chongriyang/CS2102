@@ -35,30 +35,20 @@ if (isset($_SESSION['username']) && isset($_SESSION['user_id']) && isset($_SESSI
 	<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
 	<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-	<link href="//cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.0/bootstrap3-editable/css/bootstrap-editable.css" rel="stylesheet"/>
-	<script src="//cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.0/bootstrap3-editable/js/bootstrap-editable.min.js"></script>
 </head>
 <body>
 
 	<?php require_once($_SERVER['DOCUMENT_ROOT'] . '/crowd_funding/header/navbar.php'); ?>
-	
-	<div style="test-align: center">
-		<a href="/crowd_funding/member/administrator/manage_user_account.php">
-		    Manage User Accounts
-		</a>
-	</div>
-	<div>
-		<a href="/crowd_funding/member/administrator/manage_project.php">
-		    Manage Projects
-		</a>
-	</div>
-	<div>
-		<a href="/crowd_funding/member/administrator/create_new_user_account.php">
-		    Create New User Account
-		</a>
-	</div>
+	<?php require_once($_SERVER['DOCUMENT_ROOT'] . '/crowd_funding/member/administrator/user_account_table.php'); ?>
 
-</body>
+
+	</body>
 
 <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/crowd_funding/header/footer.php'); ?>
 	</html>
+
+	<script type="text/javascript" src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
+
+<!-- Include Date Range Picker -->
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.1/js/bootstrap-datepicker.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.1/css/bootstrap-datepicker3.css"/>

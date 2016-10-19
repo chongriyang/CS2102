@@ -33,7 +33,7 @@ if (!empty($_POST['login_submit'])) {
 	$salt = "F3#@$%ewgSDGaskjf#@$EFsdFGqwjfqad@#$^$%&segjlkszflijs";
 	$password = hash('sha256', $salt.$password);
 
-	$query_login = "SELECT email, password, user_id, name, is_admin FROM person WHERE email = '$email' AND is_activated = '1' LIMIT 1";
+	$query_login = "SELECT p.email, p.password, p.user_id, p.name, p.is_admin FROM person p WHERE p.email = '$email' AND p.is_activated = '1' LIMIT 1";
 
 	if (!empty($email) && !empty($password)) {
 		if (!preg_match('/[^A-Za-z0-9\@.]/', $email)) {
@@ -149,7 +149,7 @@ if (!empty($_POST['login_submit'])) {
 	<?php 
 		$projectnumber = $_GET["project_id"];
 
-		$query='SELECT * FROM project WHERE project_id='. $projectnumber;
+		$query='SELECT * FROM project p WHERE p.project_id='. $projectnumber;
 		$result = pg_query($query) or die('Query failed: ' . pg_last_error());
 		if ($result) {
 		$row = pg_fetch_row($result);

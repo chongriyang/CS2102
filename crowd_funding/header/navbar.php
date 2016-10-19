@@ -25,7 +25,7 @@
 							<li><a href="/crowd_funding/project/view_funded_project.php">Funded Projects</a></li>
 							<li><a href="/crowd_funding/project/view_bookmarked_project.php">Bookmarked Projects</a></li>
 							<li><a href="/crowd_funding/project/view_transaction.php">Transactions</a></li>
-							<li><a href="#">Edit Profile</a></li>
+							<li><a href="/crowd_funding/module/edit_profile.php">Edit Profile</a></li>
 							<li><a href="/crowd_funding/module/logout.php">Log Out</a></li>
 							<?php } ?>
 							<?php if (!(isset($_SESSION['username']) && isset($_SESSION['user_id']))) { ?>
