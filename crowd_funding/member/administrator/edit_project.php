@@ -33,7 +33,7 @@ $category_id = $query2['category_id'];
 $getCategoryType = pg_query("SELECT c.type FROM category c WHERE c.category_id = '$category_id'") or die ('Query failed' . pg_last_error());
 $row3 = pg_fetch_array($getCategoryType);
 
-if (isset($_POST['create_project'])) {
+if (isset($_POST['edit_project'])) {
 	$id2 = $id3;
 	date_default_timezone_set("Asia/Singapore");
 	$today_date = date('Y-m-d');
@@ -94,7 +94,7 @@ if (isset($_POST['create_project'])) {
 <!DOCTYPE html>
 <html lang="en">
 	<head>
-		<title>Edit My Project</title>
+		<title>Edit Project</title>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
@@ -115,7 +115,7 @@ if (isset($_POST['create_project'])) {
 		<div class="container">
 
 		<form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>" class="form-signin">
-			<h2 class="form-signin-heading">Create Project</h2>
+			<h2 class="form-signin-heading">Edit Project</h2>
 			<label for="input_name" class="control-label">Name</label>
 			<input type="name" id="input_name" class="form-control" placeholder="Name" name="name" value="<?php echo $query2['name']; ?>" required required autofocus>
 			<label for="input_name" class="control-label">Category</label>
@@ -166,7 +166,7 @@ if (isset($_POST['create_project'])) {
 			<br><br>
 
 
-			<button class="btn btn-lg btn-primary btn-block" type="submit" name="create_project" value="create_project" id="submit">Edit Project</button>
+			<button class="btn btn-lg btn-primary btn-block" type="submit" name="edit_project" value="edit_project" id="submit">Edit Project</button>
 		
 		</form>
 	<?php

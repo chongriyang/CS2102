@@ -205,7 +205,7 @@ if(isset($_POST['formSubmit']))
 	
 
 	$query = "SELECT p.project_id as project_id, p.user_id as user_id, p.category_id as category_id, p.name as project_name,p.description as description, 
-			p.amount as amount, p.raised as raised, p.end_date as end_date FROM project p ";
+			p.amount as amount, p.raised as raised, p.start_date as start_date, p.end_date as end_date FROM project p ";
 	/*********************************
 	 *get all search keywords, if any
 	 *********************************/	
@@ -288,6 +288,7 @@ if(isset($_POST['formSubmit']))
 		$description = $row['description'];
 		$amount = $row['amount'];
 		$raised = $row['raised'];
+		$startDate = $row['start_date'];
 		$endDate = $row['end_date'];
 		
 		$getName = pg_query("SELECT name FROM person WHERE user_id ='$userID'") or die ('One owner does not exist');
@@ -308,6 +309,7 @@ if(isset($_POST['formSubmit']))
 		echo "<th>Category</th>";
 		echo "<th>Total Amount</th>";
 		echo "<th>Amount Raised</th>";
+		echo "<th>Start Date</th>";
 		echo "<th>Closing Date</th>";
 		echo "<th>View</th>";
 		echo "<th>Action</th>";
@@ -322,9 +324,10 @@ if(isset($_POST['formSubmit']))
 		echo "<td>$projectName</td>";
 		echo "<td>$description</td>";
 		echo "<td>$categorytype</td>";
-		echo "<td>$$amount</td>";
-		echo "<td>$$raised</td>";
-		echo "<td>$endDate</td>"; 
+		echo "<td>$amount</td>";
+		echo "<td>$raised</td>";
+		echo "<td>$startDate</td>";
+		echo "<td>$endDate</td>";
 		?>
 		<td><a href="project.php?project_id=$projectID" type="button" class="btn btn-success">View</a></td>
 		<td width=70><button  type="button"  class="btn btn-success"  data-toggle="modal" data-target="#<?php echo''.$projectID.'';?>">Fund</button></td></tr>

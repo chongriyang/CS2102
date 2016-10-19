@@ -288,7 +288,6 @@ if(isset($_POST['formSubmit']))
 		$raised = $row['raised'];
 		$startDate = $row['start_date'];
 		$endDate = $row['end_date'];
-		$rangeDate = $startDate . " - " . $endDate;
 		
 		$getName = pg_query("SELECT p.name FROM person p WHERE p.user_id ='$userID'") or die ('One owner does not exist');
 		$row2 = pg_fetch_array($getName);
@@ -306,8 +305,9 @@ if(isset($_POST['formSubmit']))
 		echo "<th>Project Name</th>";
 		echo "<th>Description</th>";
 		echo "<th>Category</th>";
-		echo "<th>Total Amount</th>";
+		echo "<th>Target Amount</th>";
 		echo "<th>Amount Raised</th>";
+		echo "<th>Start Date</th>";
 		echo "<th>Closing Date</th>";
 		echo "<th>View</th>";
 		echo "<th>Edit</th>";
@@ -323,9 +323,11 @@ if(isset($_POST['formSubmit']))
 		echo "<td>$projectName</td>";
 		echo "<td>$description</td>";
 		echo "<td>$categorytype</td>";
-		echo "<td>$$amount</td>";
-		echo "<td>$$raised</td>";
+		echo "<td>$amount</td>";
+		echo "<td>$raised</td>";
+		echo "<td>$startDate</td>";
 		echo "<td>$endDate</td>";
+		echo "<td</td>";
 		?>
 		<td><a href="project.php?project_id=$projectID" type="button" class="btn btn-success">View</a></td>
 		<?php
@@ -358,22 +360,4 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/crowd_funding/connection/close_connec
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.1/css/bootstrap-datepicker3.css"/>
 <?php require_once($_SERVER['DOCUMENT_ROOT'] . '/crowd_funding/header/footer.php'); ?>
 </html>
-<script type="text/javascript" src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
-
-
-<!-- Include Date Range Picker -->
-<script type="text/javascript" src="//cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.js"></script>
-<link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.css" />
-
-<script>
-	$(document).ready(function(){
-	var date_input=$('input[name="date"]'); //our date input has the name "date"
-	var container=$('.bootstrap-iso form').length>0 ? $('.bootstrap-iso form').parent() : "body";
-	date_input.datepicker({
-	format: 'yyyy-mm-dd',
-	container: container,
-	todayHighlight: true,
-	autoclose: true,
-	})
-	})
 </script>
