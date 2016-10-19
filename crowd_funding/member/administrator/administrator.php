@@ -48,6 +48,11 @@ if (isset($_SESSION['username']) && isset($_SESSION['user_id']) && isset($_SESSI
 		</a>
 	</div>
 	<div>
+		<a href="/crowd_funding/member/administrator/manage_transaction.php">
+			Manage Transactions
+		</a>
+	</div>
+	<div>
 		<a href="/crowd_funding/member/administrator/manage_project.php">
 		    Manage Projects
 		</a>
@@ -57,6 +62,7 @@ if (isset($_SESSION['username']) && isset($_SESSION['user_id']) && isset($_SESSI
 		    Create New User Account
 		</a>
 	</div>
+
 
 </body>
 
