@@ -311,6 +311,7 @@ if(isset($_POST['formSubmit']))
 		echo "<th>Closing Date</th>";
 		echo "<th>View</th>";
 		echo "<th>Edit</th>";
+		echo "<th>Delete</th>";
 		echo "<th></th>";
 		echo "</tr>";
 		echo "</thead>";
