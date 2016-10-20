@@ -175,7 +175,12 @@ if (!empty($_POST['login_submit'])) {
 									<input type="number" class="form-control" name="amount" placeholder="pledged amount">
 								</div>
 								<div class="form-group">
-									<input type="number" class="form-control" name="raised" placeholder="raised amount">
+									<!-- <input type="text" class="form-control" name="type" placeholder="category"> -->
+									<select class="select form-control" name="quota" placeholder="quota">
+										<option value="">-</option>
+										<option value="met_quota">met quota</option>
+										<option value="below_quota">below quota</option>
+									</select>
 								</div>
 								<button type="submit" name="formSubmit" value="Search" class="btn btn-primary">Search</button>
 							</form>
@@ -200,11 +205,15 @@ $_SESSION['url'] = $url;
 if(isset($_POST['formSubmit'])) 
 {
 	$fields = array('owner', 'name', 'type', 'description', 'amount', 'raised');
-	$conditions = array();
+	$conditions1 = array();
+	$conditions2 = array();
 	$query = '';
+	$query2 = '';
 
-	$query = "SELECT p.project_id as project_id, p.user_id as user_id, p.category_id as category_id, p.name as project_name,p.description as description, 
-			p.amount as amount, p.raised as raised, p.start_date as start_date, p.end_date as end_date FROM project p ";
+	$query = "SELECT p1.project_id as project_id, u1.name as user_name, c1.type as category_type, p1.name as project_name,p1.description as description, 
+			p1.amount as amount, p1.start_date as start_date, p1.end_date as end_date, SUM(t1.amount) as raised, COUNT(DISTINCT t1.user_id) as number_of_contributor FROM person u1, project p1, transaction t1, category c1";
+	$query2 = "SELECT p2.project_id as project_id, u2.name as user_name, c2.type as category_type, p2.name as project_name,p2.description as description, 
+	p2.amount as amount, p2.start_date as start_date, p2.end_date as end_date, 0 as raised, 0 as number_of_contributor FROM person u2, project p2, category c2";
 	/*********************************
 	 *get all search keywords, if any
 	 *********************************/	
@@ -214,23 +223,23 @@ if(isset($_POST['formSubmit']))
 			
 			//doing case insensitive search on strings and strict comparison on numbers
 			if(is_numeric($_POST[$value])){
-				$conditions[] = "p."."$value = " . pg_escape_string($_POST[$value]) . " ";
+				$conditions1[] = "p1."."$value = " . pg_escape_string($_POST[$value]) . " ";
+				$conditions2[] = "p2."."$value = " . pg_escape_string($_POST[$value]) . " ";
 			}else{
 				$searchTerm = strtolower($_POST[$value]);
 				
 				if($value == 'owner'){
-						$query.=', person u '; 
-						$conditions[] = "lower(u.name) LIKE '%" . pg_escape_string($searchTerm) . "%'";
-						$conditions[] = "u.user_id = p.user_id";
+						$conditions1[] = "lower(u1.name) LIKE '%" . pg_escape_string($searchTerm) . "%'";
+						$conditions2[] = "lower(u2.name) LIKE '%" . pg_escape_string($searchTerm) . "%'";
 				}
 				else if($value == 'type'){
-						$query.=', category c ';
-						$conditions[] = "lower(c.$value) LIKE '%" . pg_escape_string($searchTerm) . "%'";
-						$conditions[] = "c.category_id = p.category_id";
+						$conditions1[] = "lower(c1.$value) LIKE '%" . pg_escape_string($searchTerm) . "%'";
+						$conditions2[] = "lower(c2.$value) LIKE '%" . pg_escape_string($searchTerm) . "%'";
 				}
 				else
 				{
-					$conditions[] = "lower(p.$value) LIKE '%" . pg_escape_string($searchTerm) . "%'";
+					$conditions1[] = "lower(p1.$value) LIKE '%" . pg_escape_string($searchTerm) . "%'";
+					$conditions2[] = "lower(p2.$value) LIKE '%" . pg_escape_string($searchTerm) . "%'";
 				}
 			}
 		}
@@ -239,18 +248,54 @@ if(isset($_POST['formSubmit']))
 	/**************************************************
 	 *append search query if search keywords are found 
 	 **************************************************/
-	if(count($conditions) > 0) {
-		$query .= " WHERE " . implode (' AND ', $conditions); // you can change to 'OR', but I suggest to apply the filters cumulative
-		$query .= " ORDER BY p.project_id ASC ";
+	$query .= " WHERE ";
+	$query2 .= " WHERE ";
+	if(count($conditions1) > 0 && count($conditions1) > 0) {
+		$query .= implode (' AND ', $conditions1); // you can change to 'OR', but I suggest to apply the filters cumulative
+		$query2 .= implode (' AND ', $conditions2); // you can change to 'OR', but I suggest to apply the filters cumulative
+		$query .= " AND ";
+		$query2 .= " AND ";
 	}
+
+	if($_POST['quota'] != '') {
+		if ($_POST['quota'] == 'met_quota') {
+			$query2 .= " p2.amount = 0 AND";
+		} else {
+			$query2 .= " p2.amount > 0 AND";
+		}
+	}
+
+	$query .= " p1.user_id=u1.user_id AND";
+	$query .= " p1.project_id=t1.project_id AND";
+	$query .= " p1.category_id=c1.category_id";
+
+	$query .= " GROUP BY p1.project_id, p1.user_id, p1.name, p1.description, p1.amount, p1.start_date, p1.end_date, u1.name, c1.category_id, c1.type";
+	/**$query .= " ORDER BY p.project_id ASC";**/
+
+	$query2 .= " p2.user_id=u2.user_id AND";
+	$query2 .= " p2.category_id=c2.category_id AND";
+
+	$query2 .= " NOT EXISTS (SELECT * FROM transaction t2 WHERE p2.project_id = t2.project_id)";
+	/**$query2 .= " ORDER BY p2.project_id ASC";**/
+
+	if($_POST['quota'] != '') {
+		if ($_POST['quota'] == 'met_quota') {
+			$query .= " HAVING SUM(t1.amount) >= p1.amount";
+		} else {
+			$query .= " HAVING SUM(t1.amount) < p1.amount";
+		}
+	}
+
+	$unionQuery = " UNION ";
+	$query3 = $query . $unionQuery . $query2;
 
 	/**************************************************
 	 *display SQL query (for testing) 
 	 **************************************************/
-	echo '<div class="container">'; 
+	echo '<div class="container">';
 	echo '<div class="row">'; 
 	echo '<div class="col-lg-12 text-center">';
-	echo "<b>SQL: </b>".$query."<br><br>"; 
+	echo "<b>SQL: </b>".$query3."<br><br>"; 
 	echo "</div>"; 
 	echo "</div>"; 
 	echo "</div>"; 
@@ -258,7 +303,7 @@ if(isset($_POST['formSubmit']))
 	/**************************************************
 	 *SQL query validate
 	 **************************************************/
-	$result = pg_query($query) or die('Please enter at least one search term');
+	$result = pg_query($query3) or die('Please enter at least one search term');
 
 
 	/**************************************************
@@ -268,7 +313,7 @@ if(isset($_POST['formSubmit']))
 	echo '<div class="container">'; 
 	echo '<div class="row">'; 
 	echo '<div class="col-lg-12 text-center">';
-	echo "<p><strong>$num_rows </strong> results for '$searchTerm'</p>";
+	echo "<p><strong>Number of projects found: </strong>$num_rows</p>";
 	echo "</div>"; 
 	echo "</div>"; 
 	echo "</div>"; 
@@ -279,23 +324,17 @@ if(isset($_POST['formSubmit']))
 	echo '<div class="container">'; 
 	echo '<div class="row">'; 
 	while ($row = pg_fetch_array($result, null, PGSQL_ASSOC)) {
-		$userID = $row['user_id'];
 		$projectID = $row['project_id'];
 		$categoryID = $row['category_id'];
 		$projectName = $row['project_name'];
 		$description = $row['description'];
 		$amount = $row['amount'];
+		$number_of_contributor = $row['number_of_contributor'];
 		$raised = $row['raised'];
 		$startDate = $row['start_date'];
 		$endDate = $row['end_date'];
-		
-		$getName = pg_query("SELECT p.name FROM person p WHERE p.user_id ='$userID'") or die ('One owner does not exist');
-		$row2 = pg_fetch_array($getName);
-		$username = $row2['name'];
-
-		$getCategory = pg_query("SELECT c.type FROM category c WHERE c.category_id = '$categoryID'") or die ('One category does not exist');
-		$row3 = pg_fetch_array($getCategory);
-		$categorytype = $row3['type'];		
+		$username = $row['user_name'];
+		$categorytype = $row['category_type'];		
 
 		echo '<table class="table table-hover table-inverse" >';
 		echo "<thead>";
@@ -309,7 +348,7 @@ if(isset($_POST['formSubmit']))
 		echo "<th>Amount Raised</th>";
 		echo "<th>Start Date</th>";
 		echo "<th>Closing Date</th>";
-		echo "<th>View</th>";
+		echo "<th>No. of Contributors</th>";
 		echo "<th>Edit</th>";
 		echo "<th>Delete</th>";
 		echo "<th></th>";
@@ -327,11 +366,11 @@ if(isset($_POST['formSubmit']))
 		echo "<td>$raised</td>";
 		echo "<td>$startDate</td>";
 		echo "<td>$endDate</td>";
+		echo "<td>$number_of_contributor</td>";
 		echo "<td</td>";
 		?>
-		<td><a href="project.php?project_id=$projectID" type="button" class="btn btn-success">View</a></td>
 		<?php
-		echo "<td><a class='btn btn-info' href='/crowd_funding/member/administrator/edit_project.php?id=".$projectID."&user_id=".$userID."'>Edit</a></td>";
+		echo "<td><a class='btn btn-success' href='/crowd_funding/member/administrator/edit_project.php?id=".$projectID."&user_id=".$userID."'>Edit</a></td>";
 		echo "<td width=70><a class='btn btn-danger' href='/crowd_funding/member/administrator/delete_project.php?id=".$projectID."'>Delete</a></td></tr>";
 		?>
 		<?php

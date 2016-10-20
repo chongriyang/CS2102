@@ -38,8 +38,12 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/crowd_funding/connection/open_connect
 		$url=$_SERVER['REQUEST_URI'];
 		$_SESSION['url'] = $url;
 		
-		echo "<table><tr><td>User</td><td>Name</td><td>Description</td><td>Amount</td><td>Raised</td><td colspan='2'><center>Action</center></td>";
-		$results = pg_query("SELECT DISTINCT p.user_id, p.project_id,p.name,p.description,p.amount,p.raised FROM project p,transaction t WHERE t.project_id=p.project_id AND t.user_id='$user_id'");
+		echo "<table><tr><td>Project ID</td><td>Owner</td><td>Project Name</td><td>Description</td><td>Category</td><td>Target Amount</td><td>Raised</td><td>Start Date</td><td>Closing Date</td><td>No. of contributors</td><td colspan='2'><center>Action</center></td>";
+		$results = pg_query("SELECT p1.project_id as project_id, u1.name as user_name, c1.type as category_type, p1.name as project_name,
+			p1.description as description, p1.amount as amount, p1.start_date as start_date, p1.end_date as end_date, SUM(t1.amount) as raised, 
+			COUNT(DISTINCT t1.user_id) as number_of_contributor FROM person u1, project p1, transaction t1, category c1 WHERE p1.user_id=u1.user_id 
+			AND p1.project_id=t1.project_id AND p1.category_id=c1.category_id AND t1.user_id=$user_id GROUP BY p1.project_id, p1.user_id, p1.name, p1.description, p1.amount, 
+			p1.start_date, p1.end_date, u1.name, c1.category_id, c1.type") or die('Query failed: insert ' . pg_last_error());
 		while($query2=pg_fetch_array($results))
 		{
 			$project_id=$query2['project_id'];
@@ -57,16 +61,30 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/crowd_funding/connection/open_connect
 				$img='unbookmark';
 			}
 			
-			$userID = $query2['user_id'];
-			$getName = pg_query("SELECT name FROM person WHERE user_id ='$userID'");
-			$row2 = pg_fetch_array($getName);
-			$username = $row2['name'];
-			
-			echo "<tr><td>".$username."</td>";
-			echo "<td>".$query2['name']."</td>";
-			echo "<td>".$query2['description']."</td>";
-			echo "<td>".$query2['amount']."</td>";
-			echo "<td>".'$ '.intval($query2['raised']). "  "."</td>";
+			$projectID = $query2['project_id'];
+			$categoryID = $query2['category_id'];
+			$projectName = $query2['project_name'];
+			$description = $query2['description'];
+			$amount = $query2['amount'];
+			$number_of_contributor = $query2['number_of_contributor'];
+			$raised = $query2['raised'];
+			$startDate = $query2['start_date'];
+			$endDate = $query2['end_date'];
+			$username = $query2['user_name'];
+			$categorytype = $query2['category_type'];
+
+			echo "<tr>";
+			echo "<td>$projectID</td>";
+			echo "<td>$username</td>";
+			echo "<td>$projectName</td>";
+			echo "<td>$description</td>";
+			echo "<td>$categorytype</td>";
+			echo "<td>$amount</td>";
+			echo "<td>$raised</td>";
+			echo "<td>$startDate</td>";
+			echo "<td>$endDate</td>";
+			echo "<td>$number_of_contributor</td>";
+			echo "<td</td>";
 			echo "<td width=40><a class=".$img." href='/crowd_funding/project/bookmark_project.php?id=".$query2['project_id']."&bookmark=".$bookmark."' id='unbookmark'>"."</a></td>";
 			
 			
