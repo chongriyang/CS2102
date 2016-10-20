@@ -23,8 +23,7 @@ if(isset($_GET['project_id'])&&isset($_GET['amount']))
 	$now = new DateTime();
 	$now =$now->format('Y-m-d H:i:s');
 	$query1=pg_query("INSERT INTO transaction (user_id,project_id,amount,date_time) VALUES ('$user_id','$project_id','$amount','$now')") or die('Query failed:3 ' . pg_last_error());
-	$query2=pg_query("UPDATE project SET raised = raised+'$amount' WHERE project_id = '$project_id'") or die('Query failed:1 ' . pg_last_error());
-	if($query1&&$query2)
+	if($query1)
 	{
 		header('location:'.$url);
 	}
