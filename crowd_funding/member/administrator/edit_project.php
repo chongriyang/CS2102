@@ -58,7 +58,7 @@ if (isset($_POST['edit_project'])) {
 	$row4 = pg_fetch_array($getCategoryID);
 	$categoryID = $row4['category_id'];
 
-	$query_update_project = "UPDATE project SET  name='$name', category_id = $categoryID, description='$description', start_date='$startDate', end_date='$endDate', amount='$amount' WHERE project_id='$id2' AND user_id='$user_id' ";
+	$query_update_project = "UPDATE project SET  name='$name', category_id = '$categoryID', description='$description', start_date='$startDate', end_date='$endDate', amount='$amount' WHERE project_id='$id2' AND user_id='$user_id'";
 	$query_select_duplicate_project = "SELECT p.name, p.user_id FROM project p WHERE p.name = '$name' AND p.user_id = '$user_id' LIMIT 1";
 	$query_select_user = "SELECT p.user_id, p.name FROM person p WHERE p.email = '$email' AND p.is_activated = '1' LIMIT 1";
 			
@@ -75,7 +75,7 @@ if (isset($_POST['edit_project'])) {
 		if($name != $db_name && $user_id != $db_user){
 			if (str_word_count($description)<=100) {
 				$result_update_project = pg_query($query_update_project) or die('Query failed: insert ' . pg_last_error());
-				if ($result_update_project) {\
+				if ($result_update_project) {
 						header('Location: /crowd_funding/member/administrator/manage_project.php');
 						die();
 			

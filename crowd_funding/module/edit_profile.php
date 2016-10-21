@@ -100,7 +100,6 @@
 	<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 </head>
 <body>
-
 	<?php require_once($_SERVER['DOCUMENT_ROOT'] . '/crowd_funding/header/navbar.php'); ?>
 	<?php
 	include $_SERVER['DOCUMENT_ROOT'] . '/crowd_funding/connection/open_connection.php';

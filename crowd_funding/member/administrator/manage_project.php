@@ -201,7 +201,15 @@ $url='/crowd_funding/project/browse.php';
 $_SESSION['url'] = $url;
 /**********************************************************
  *check if form is submitted, if yes, start SQL query
- **********************************************************/	
+ **********************************************************/
+
+$query3 = " SELECT p1.project_id as project_id, p1.user_id as user_id, u1.name as user_name, c1.type as category_type, p1.name as project_name,p1.description as description, p1.amount as amount, p1.start_date as start_date, 
+p1.end_date as end_date, SUM(t1.amount) as raised, COUNT(DISTINCT t1.user_id) as number_of_contributor FROM person u1, project p1, transaction t1, category c1 WHERE p1.user_id=u1.user_id 
+AND p1.project_id=t1.project_id AND p1.category_id=c1.category_id GROUP BY p1.project_id, p1.user_id, p1.name, p1.description, p1.amount, p1.start_date, p1.end_date, u1.name, c1.category_id, c1.type 
+UNION SELECT p2.project_id as project_id, p2.user_id as user_id, u2.name as user_name, c2.type as category_type, p2.name as project_name,p2.description as description, p2.amount as amount, p2.start_date as start_date, 
+p2.end_date as end_date, 0 as raised, 0 as number_of_contributor FROM person u2, project p2, category c2 WHERE p2.user_id=u2.user_id AND p2.category_id=c2.category_id 
+AND NOT EXISTS (SELECT * FROM transaction t2 WHERE p2.project_id = t2.project_id)";
+
 if(isset($_POST['formSubmit'])) 
 {
 	$fields = array('owner', 'name', 'type', 'description', 'amount', 'raised');
@@ -210,9 +218,9 @@ if(isset($_POST['formSubmit']))
 	$query = '';
 	$query2 = '';
 
-	$query = "SELECT p1.project_id as project_id, u1.name as user_name, c1.type as category_type, p1.name as project_name,p1.description as description, 
+	$query = "SELECT p1.project_id as project_id, p1.user_id as user_id, u1.name as user_name, c1.type as category_type, p1.name as project_name,p1.description as description, 
 			p1.amount as amount, p1.start_date as start_date, p1.end_date as end_date, SUM(t1.amount) as raised, COUNT(DISTINCT t1.user_id) as number_of_contributor FROM person u1, project p1, transaction t1, category c1";
-	$query2 = "SELECT p2.project_id as project_id, u2.name as user_name, c2.type as category_type, p2.name as project_name,p2.description as description, 
+	$query2 = "SELECT p2.project_id as project_id, p2.user_id as user_id, u2.name as user_name, c2.type as category_type, p2.name as project_name,p2.description as description, 
 	p2.amount as amount, p2.start_date as start_date, p2.end_date as end_date, 0 as raised, 0 as number_of_contributor FROM person u2, project p2, category c2";
 	/*********************************
 	 *get all search keywords, if any
@@ -288,6 +296,7 @@ if(isset($_POST['formSubmit']))
 
 	$unionQuery = " UNION ";
 	$query3 = $query . $unionQuery . $query2;
+}
 
 	/**************************************************
 	 *display SQL query (for testing) 
@@ -321,10 +330,11 @@ if(isset($_POST['formSubmit']))
 	/**************************************************
 	 *display SQL query result (html formatting)
 	 **************************************************/
-	echo '<div class="container">'; 
-	echo '<div class="row">'; 
+	echo '<div class="container">';
+	echo '<div class="row">';
 	while ($row = pg_fetch_array($result, null, PGSQL_ASSOC)) {
 		$projectID = $row['project_id'];
+		$userID = $row['user_id'];
 		$categoryID = $row['category_id'];
 		$projectName = $row['project_name'];
 		$description = $row['description'];
@@ -389,7 +399,6 @@ if(isset($_POST['formSubmit']))
 	 *clsoe DB
 	 **************************************************/
 	pg_free_result($result);
-}
 include_once $_SERVER['DOCUMENT_ROOT'] . '/crowd_funding/connection/close_connection.php';
 ?>
 <script type="text/javascript" src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
