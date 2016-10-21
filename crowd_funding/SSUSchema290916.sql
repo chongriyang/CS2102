@@ -33,7 +33,7 @@ start_date DATE,
 end_date DATE,
 amount NUMERIC NOT NULL DEFAULT 0.0,
 raised NUMERIC NOT NULL DEFAULT 0.0,
-number_of_contributer INT DEFAULT 0
+number_of_contributor INT DEFAULT 0
 );
 
 CREATE TABLE bookmark (
