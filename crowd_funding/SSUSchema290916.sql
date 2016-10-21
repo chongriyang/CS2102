@@ -32,6 +32,7 @@ description VARCHAR(256),
 start_date DATE,
 end_date DATE,
 amount NUMERIC NOT NULL DEFAULT 0.0,
+raised NUMERIC NOT NULL DEFAULT 0.0
 );
 
 CREATE TABLE bookmark (
