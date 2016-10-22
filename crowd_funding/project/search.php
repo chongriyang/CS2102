@@ -209,18 +209,18 @@ if(isset($_POST['formSubmit']))
 	$conditions2 = array();
 	$query = '';
 	$query2 = '';
-
-	$query = "SELECT p1.project_id as project_id, u1.name as user_name, c1.type as category_type, p1.name as project_name,p1.description as description, 
-			p1.amount as amount, p1.start_date as start_date, p1.end_date as end_date, SUM(t1.amount) as raised, COUNT(DISTINCT t1.user_id) as number_of_contributor FROM person u1, project p1, transaction t1, category c1";
-	$query2 = "SELECT p2.project_id as project_id, u2.name as user_name, c2.type as category_type, p2.name as project_name,p2.description as description, 
-	p2.amount as amount, p2.start_date as start_date, p2.end_date as end_date, 0 as raised, 0 as number_of_contributor FROM person u2, project p2, category c2";
+	$query3 ='';
+	
 	/*********************************
 	 *get all search keywords, if any
 	 *********************************/	
 	foreach($fields as $value){
 
 		if($_POST[$value] != '') {
-			
+			$query = "SELECT p1.project_id as project_id, u1.name as user_name, c1.type as category_type, p1.name as project_name,p1.description as description, 
+			p1.amount as amount, p1.start_date as start_date, p1.end_date as end_date, SUM(t1.amount) as raised, COUNT(DISTINCT t1.user_id) as number_of_contributor FROM person u1, project p1, transaction t1, category c1";
+			$query2 = "SELECT p2.project_id as project_id, u2.name as user_name, c2.type as category_type, p2.name as project_name,p2.description as description, 
+			p2.amount as amount, p2.start_date as start_date, p2.end_date as end_date, 0 as raised, 0 as number_of_contributor FROM person u2, project p2, category c2";
 			//doing case insensitive search on strings and strict comparison on numbers
 			if(is_numeric($_POST[$value])){
 				$conditions1[] = "p1."."$value = " . pg_escape_string($_POST[$value]) . " ";
@@ -248,47 +248,47 @@ if(isset($_POST['formSubmit']))
 	/**************************************************
 	 *append search query if search keywords are found 
 	 **************************************************/
-	$query .= " WHERE ";
-	$query2 .= " WHERE ";
-	if(count($conditions1) > 0 && count($conditions1) > 0) {
+
+	if(count($conditions1) > 0 ) {
+		$query .= " WHERE ";
+		$query2 .= " WHERE ";
 		$query .= implode (' AND ', $conditions1); // you can change to 'OR', but I suggest to apply the filters cumulative
 		$query2 .= implode (' AND ', $conditions2); // you can change to 'OR', but I suggest to apply the filters cumulative
 		$query .= " AND ";
 		$query2 .= " AND ";
-	}
 
-	if($_POST['quota'] != '') {
-		if ($_POST['quota'] == 'met_quota') {
-			$query2 .= " p2.amount = 0 AND";
-		} else {
-			$query2 .= " p2.amount > 0 AND";
+		if($_POST['quota'] != '') {
+			if ($_POST['quota'] == 'met_quota') {
+				$query2 .= " p2.amount = 0 AND";
+			} else {
+				$query2 .= " p2.amount > 0 AND";
+			}
 		}
-	}
 
-	$query .= " p1.user_id=u1.user_id AND";
-	$query .= " p1.project_id=t1.project_id AND";
-	$query .= " p1.category_id=c1.category_id";
+		$query .= " p1.user_id=u1.user_id AND";
+		$query .= " p1.project_id=t1.project_id AND";
+		$query .= " p1.category_id=c1.category_id";
 
-	$query .= " GROUP BY p1.project_id, p1.user_id, p1.name, p1.description, p1.amount, p1.start_date, p1.end_date, u1.name, c1.category_id, c1.type";
-	/**$query .= " ORDER BY p.project_id ASC";**/
+		$query .= " GROUP BY p1.project_id, p1.user_id, p1.name, p1.description, p1.amount, p1.start_date, p1.end_date, u1.name, c1.category_id, c1.type";
+		/**$query .= " ORDER BY p.project_id ASC";**/
 
-	$query2 .= " p2.user_id=u2.user_id AND";
-	$query2 .= " p2.category_id=c2.category_id AND";
+		$query2 .= " p2.user_id=u2.user_id AND";
+		$query2 .= " p2.category_id=c2.category_id AND";
 
-	$query2 .= " NOT EXISTS (SELECT * FROM transaction t2 WHERE p2.project_id = t2.project_id)";
-	/**$query2 .= " ORDER BY p2.project_id ASC";**/
+		$query2 .= " NOT EXISTS (SELECT * FROM transaction t2 WHERE p2.project_id = t2.project_id)";
+		/**$query2 .= " ORDER BY p2.project_id ASC";**/
 
-	if($_POST['quota'] != '') {
-		if ($_POST['quota'] == 'met_quota') {
-			$query .= " HAVING SUM(t1.amount) >= p1.amount";
-		} else {
-			$query .= " HAVING SUM(t1.amount) < p1.amount";
+		if($_POST['quota'] != '') {
+			if ($_POST['quota'] == 'met_quota') {
+				$query .= " HAVING SUM(t1.amount) >= p1.amount";
+			} else {
+				$query .= " HAVING SUM(t1.amount) < p1.amount";
+			}
 		}
+
+		$unionQuery = " UNION ";
+		$query3 = $query . $unionQuery . $query2;
 	}
-
-	$unionQuery = " UNION ";
-	$query3 = $query . $unionQuery . $query2;
-
 	/**************************************************
 	 *display SQL query (for testing) 
 	 **************************************************/
