@@ -25,6 +25,11 @@ if (!empty($_POST['create_project'])) {
 	$dateStr = trim($_POST['daterange']);
 	$amount = trim($_POST['amount']);
 	
+	$category_type = trim($_POST['category_type']);
+	$query_category_id = pg_query("SELECT category_id FROM category WHERE type = '$category_type' LIMIT 1");
+	$category_id_row = pg_fetch_row($query_category_id);
+	$category_id = $category_id_row[0];
+	
 	$arr = explode(' ',trim($dateStr));
 	$start=$arr[0];
 	$end=$arr[2];
@@ -33,7 +38,7 @@ if (!empty($_POST['create_project'])) {
 	$startDate = date('Y-m-d',$time);
 	$endDate = date('Y-m-d',$time2);
 
-	$query_insert_project = "INSERT INTO project (user_id, name, description, start_date, end_date, amount, raised) VALUES ('$user_id', '$name', '$description', '$startDate', '$endDate', '$amount', '0.0')";
+	$query_insert_project = "INSERT INTO project (user_id, name, description, start_date, end_date, amount, category_id) VALUES ('$user_id', '$name', '$description', '$startDate', '$endDate', '$amount', '$category_id')";
 	$query_select_duplicate_project = "SELECT name,user_id FROM project WHERE name = '$name' AND user_id = '$user_id' LIMIT 1";
 	$query_select_user = "SELECT user_id, name FROM person WHERE email = '$email' AND is_activated = '1' LIMIT 1";
 		
@@ -100,6 +105,26 @@ if (!empty($_POST['create_project'])) {
 			<label for="input_name" class="sr-only">Name</label>
 			<input type="name" id="input_name" class="form-control" placeholder="Name" name="name" required required autofocus>
 
+			<div class="form-group">
+				<label for="category">Category:</label>
+				<select class="form-control" id="category" name="category_type">
+				<?php
+					include_once $_SERVER['DOCUMENT_ROOT'] . '/crowd_funding/connection/open_connection.php';
+
+					$results = pg_query("SELECT * FROM category") or die('Query failed: insert ' . pg_last_error());
+					while($query=pg_fetch_array($results))
+					{
+						$category_id=$query['category_id'];
+						$category_type=$query['type'];
+						
+						//echo "<li id=".$category_id."><a href='#'>".$category_type ."</a></li>";
+						echo "<option>" . $category_type . "</option>";
+					}
+			
+				?>
+				</select>
+			</div>
+			
 			<div class="form-group">
 			  <label for="comment">Description:</label>
 			  <textarea class="form-control" name="description" placeholder="Enter up to 100 words" rows="5" id="comment" required required autofocus></textarea>
