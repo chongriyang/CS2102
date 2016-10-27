@@ -161,7 +161,7 @@ if(isset($_POST['formSubmit']))
 	echo '<div class="container">'; 
 	echo '<div class="row">'; 
 	echo '<div class="col-lg-12 text-center">';
-	echo "<b>SQL: </b>".$query."<br><br>";
+	/**echo "<b>SQL: </b>".$query."<br><br>";**/
 	echo "</div>"; 
 	echo "</div>"; 
 	echo "</div>"; 
