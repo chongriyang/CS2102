@@ -18,7 +18,7 @@
 					<li><a href="/crowd_funding/project/search.php">Search</a></li>
 					<?php if (isset($_SESSION['username']) && isset($_SESSION['user_id'])) { ?>
 					<li>
-						<a href="#" class="dropdown-toggle" data-toggle="dropdown" type="text">Welcome <?php echo $username ?> <span class="caret"></span></a>
+						<a href="#" class="dropdown-toggle" data-toggle="dropdown" type="text">Welcome <?php echo $_SESSION['username'] ?> <span class="caret"></span></a>
 						<ul class="dropdown-menu">
 							<li><a href="#"></a></li>
 							<li><a href="/crowd_funding/project/view_project.php">My Projects</a></li>
