@@ -54,7 +54,7 @@
 													<input type="password" id="input_password" class="form-control" placeholder="Password" name ="password" required>
 													<div class="checkbox">
 														<label>
-															<input type="checkbox" value="remember_me" name="remember_me">Remember me
+															<input type="checkbox" value="1" name="remember_me">Remember me
 														</label>
 													</div>
 													<button class="btn btn-lg btn-primary btn-block" type="submit" name="login_submit" value="login_submit">Sign in</button>
